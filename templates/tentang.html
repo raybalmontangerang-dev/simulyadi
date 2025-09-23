@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>SIMULYADI – TENTANG APLIKASI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    .content-section {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      color: #eaf0ff;
+    }
+    .content-section h2, .content-section h3 {
+      color: #ffffff;
+      margin-top: 30px;
+    }
+    .content-section p {
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+    .content-section ul {
+      padding-left: 20px;
+      margin-bottom: 20px;
+    }
+    .content-section li {
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="hero-bg">
+    <!-- ===== NAVBAR ===== -->
+    <nav class="navbar">
+    <div class="navbar-left">
+      <div style="display: flex; align-items: center; gap: 10px;">
+          <a href="/">
+            <img src="{{ url_for('static', filename='img/logo-balmon.png') }}" alt="logo-balmon" class="logo-img">
+          </a>
+          <a href="https://postel.go.id" target="_blank" rel="noopener">
+            <img src="{{ url_for('static', filename='img/logo-djid.png') }}" alt="logo-djid" class="logo-djid">
+          </a>
+          <a href="https://komdigi.go.id" target="_blank" rel="noopener">
+            <img src="{{ url_for('static', filename='img/logo-komdigi.png') }}" alt="logo-komdigi" class="logo-img">
+          </a>
+     </div>
+    </div>
+      <ul class="navbar-menu">
+        <li><a href="/">Home</a></li>
+        <li><a class="active" href="/tentang">Tentang</a></li>
+        <li><a href="/dashboard">Dashboard</a></li>
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+        {% endif %}
+      </ul>
+    </nav>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="content-section">
+      <h2>Tentang Aplikasi SIMULYADI</h2>
+      <p>
+        <strong>SIMULYADI</strong> (Sistem Monitoring Kualitas Layanan Digital) adalah aplikasi berbasis web yang dikembangkan
+        untuk membantu Balai Monitoring Spektrum Frekuensi Radio Kelas I Tangerang dalam memantau dan monitoring
+        data kualitas layanan digital (QoS) di wilayah Banten secara efisien.
+      </p>
+      <p>
+        Aplikasi ini memungkinkan visualisasi interaktif dari data QoS melalui dashboard Tableau Public, serta mendukung proses unggah
+        dan pemrosesan data hasil pengukuran dari tim teknis.
+      </p>
+
+      <h3>Versi Aplikasi</h3>
+      <ul>
+        <li>Nama Aplikasi: <strong>SIMULYADI</strong></li>
+        <li>Versi: <strong>1.0.0</strong></li>
+        <li>Rilis: <strong>Agustus 2025</strong></li>
+        <li>Teknologi: HTML, CSS, Flask (Python), Tableau Public</li>
+      </ul>
+
+      <h3>Pengembang</h3>
+      <p>
+        SIMULYADI dikembangkan oleh <strong>Raynaldi Surya</strong>, sebagai aktualisasi dari gagasan atas penyelesaian masalah utama di lingkungan Balai Monitoring Spektrum Frekuensi Radio Kelas I Tangerang. 
+        Seluruh fitur dirancang mandiri berdasarkan kebutuhan internal dan prinsip penerapan nilai BerAKHLAK.
+      </p>
+
+      <h3>Profil Balmon Tangerang</h3>
+      <p>
+        Balai Monitoring Spektrum Frekuensi Radio Kelas I Tangerang adalah unit pelaksana teknis di bawah
+        Direktorat Jenderal Infrastruktur Digital (DJID), Kementerian Komunikasi dan Digital.
+      </p>
+      <p>
+        Tugas utama Balmon adalah melakukan pengawasan, pengendalian, dan penertiban terhadap penggunaan spektrum
+        frekuensi radio serta perangkat telekomunikasi di wilayah kerja Provinsi Banten dan sekitarnya.
+      </p>
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer>
+      © 2025 – Balai Monitoring SFR Kelas I Tangerang | Aplikasi SIMULYADI v1.0 | RYNLDSR ©
+    </footer>
+  </div>
+</body>
+</html>

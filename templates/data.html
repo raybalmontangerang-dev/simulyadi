@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SIMULYADI – Data</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: radial-gradient(1000px 700px at 75% -10%, rgba(77,163,255,.22), transparent 60%), #010c3f;
+      color: #eaf0ff;
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .container { max-width: 1400px; margin: 24px auto; padding: 0 24px; width: 100%; }
+    .tabs {
+      display: flex; flex-wrap: wrap; gap: 8px; padding: 10px;
+      border-radius: 14px; border: 1px solid rgba(255,255,255,.08);
+    }
+    .tab {
+      appearance: none; border: 1px solid rgba(255,255,255,.08);
+      background: #0f1c62; color: #eaf0ff; padding: 10px 14px;
+      border-radius: 12px; font-weight: 600; cursor: pointer;
+    }
+    .tab.active {
+      background: linear-gradient(180deg, #15318f, #0f2275);
+      border-color: rgba(77,163,255,.5);
+      box-shadow: 0 6px 18px rgba(0,0,0,.25);
+    }
+    .panel { margin-top: 16px; border: 1px solid rgba(255,255,255,.08); border-radius: 16px; overflow: hidden; background: rgba(255,255,255,.04); }
+    .panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; background: rgba(255,255,255,.03);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .panel-title { font-size: 16px; font-weight: 700; margin: 0; }
+    .badge { font-size: 12px; padding: 4px 8px; border-radius: 8px; background:#15318f; border:1px solid rgba(77,163,255,.3); }
+    .toolbar { display: flex; gap: 8px; align-items: center; }
+    .toolbar input, .toolbar select, .toolbar button {
+      padding: 8px; border-radius: 10px; border: 1px solid rgba(255,255,255,.2);
+      background: #0f1c62; color: #eaf0ff; font-weight: 600; cursor: pointer;
+    }
+    .toolbar input { cursor: text; }
+    .toolbar button:hover { filter: brightness(1.05); }
+    .table-card {
+      background: #ffffff; border-radius: 16px; margin: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      color: #1a1f36;
+    }
+    .table-scroll { overflow: auto; max-height: 68vh; }
+    table { width:100%; border-collapse: separate; border-spacing: 0; }
+    thead th {
+      position: sticky; top: 0; z-index: 2;
+      background: #f7f8fa; color: #0f172a; font-weight: 700;
+      font-size: 14px; text-align: left; padding: 12px 14px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    tbody td {
+      padding: 10px 14px; font-size: 13px; border-bottom: 1px solid #f0f2f5;
+    }
+    tbody tr:nth-child(even) td { background: #fbfcff; }
+    tbody tr:hover td { background: #eef6ff; }
+    .pagination { display:flex; gap:8px; align-items:center; justify-content:flex-end; padding: 12px 16px; color:#1a1f36; }
+    .pagination button {
+      padding: 8px 12px; border-radius: 10px; border: 1px solid #d1d5db; background:#fff; color:#111827; cursor:pointer;
+    }
+    .pagination button:disabled { opacity: .5; cursor: not-allowed; }
+    .hidden { display:none; }
+    .spinner { display:inline-block; width:14px; height:14px; border:2px solid #93c5fd; border-top-color: transparent; border-radius:50%; animation: spin .8s linear infinite; vertical-align: middle; margin-left: 6px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  
+    /* ===== Skeleton rows (shimmer) & per-cell spinner ===== */
+    .table-skeleton td { padding: 10px 14px; border-bottom: 1px solid #f0f2f5; }
+    .skel {
+      display: block;
+      height: 12px;
+      width: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #f0f2f5 25%, #e6eaf0 37%, #f0f2f5 63%);
+      background-size: 400% 100%;
+      animation: shimmer 1.25s ease-in-out infinite;
+    }
+    @keyframes shimmer {
+      0% { background-position: 100% 0; }
+      100% { background-position: 0 0; }
+    }
+    .cell-spinner {
+      display:inline-block; width:14px; height:14px;
+      border:2px solid #93c5fd; border-top-color: transparent;
+      border-radius:50%; animation: spin .8s linear infinite;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-left">
+      <div style="display: flex; align-items: center; gap: 10px;">
+          <a href="/">
+            <img src="{{ url_for('static', filename='img/logo-balmon.png') }}" alt="logo-balmon" class="logo-img">
+          </a>
+          <a href="https://postel.go.id" target="_blank" rel="noopener">
+            <img src="{{ url_for('static', filename='img/logo-djid.png') }}" alt="logo-djid" class="logo-djid">
+          </a>
+          <a href="https://komdigi.go.id" target="_blank" rel="noopener">
+            <img src="{{ url_for('static', filename='img/logo-komdigi.png') }}" alt="logo-komdigi" class="logo-img">
+          </a>
+     </div>
+    </div>
+    <ul class="navbar-menu">
+      <li><a href="/">Home</a></li>
+      <li><a href="/tentang">Tentang</a></li>
+      <li><a href="/upload">Upload</a></li>
+      {% if current_user.is_authenticated %}
+      <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+      {% endif %}
+    </ul>
+  </nav>
+
+  <div class="container">
+    <div style="text-align:center;margin-bottom:20px;">
+      <h1 style="font-size:2rem;font-weight:700;margin:10px 0;color:#eaf0ff">DATABASE</h1>
+      <p style="font-size:14px;color:#a6b3e6">Sistem Monitoring Kualitas Layanan Digital – Balmon Tangerang</p>
+    </div>
+
+    <div class="tabs" role="tablist">
+      <button class="tab" data-tab="wam">WA Message</button>
+      <button class="tab" data-tab="wac">WA Call</button>
+      <button class="tab" data-tab="ping">Ping</button>
+      <button class="tab" data-tab="browsing">Browsing</button>
+      <button class="tab" data-tab="video">Video</button>
+      <button class="tab" data-tab="speedtest">SpeedTest</button>
+      <button class="tab" data-tab="rsrp">4G Parameter</button>
+    </div>
+
+    <section class="panel">
+      <div class="panel-header">
+        <h2 class="panel-title">Data <span id="panel-title-tab" class="badge">-</span> <span id="loading-flag" class="hidden"><span class="spinner"></span> Memuat…</span></h2>
+        <div class="toolbar">
+          <input id="q" type="search" placeholder="Cari..." />
+          <select id="page-size">
+            <option value="25">25/baris</option>
+            <option value="50">50/baris</option>
+            <option value="100">100/baris</option>
+          </select>
+          <button id="btn-refresh">Muat Ulang</button>
+          <button id="btn-download">Unduh CSV</button>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-scroll">
+          <table id="data-table">
+            <thead id="thead"><tr><th>Memuat kolom…</th></tr></thead>
+            <tbody id="tbody"><tr><td>Memuat data…</td></tr></tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <span id="page-info"></span>
+          <button id="prev">‹ Sebelumnya</button>
+          <button id="next">Berikutnya ›</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+      © 2025 – Balai Monitoring SFR Kelas I Tangerang | Aplikasi SIMULYADI v1.0 | RYNLDSR ©
+    </footer>
+
+  <script>
+    const params   = new URLSearchParams(location.search);
+    const initialTab = params.get('tab') || 'browsing';
+    const gWilayah  = params.get('wilayah')  || '';
+    const gProvider = params.get('provider') || '';
+    const gKategori = params.get('kategori') || '';
+
+    const tabs = Array.from(document.querySelectorAll('.tab'));
+    const titleBadge = document.getElementById('panel-title-tab');
+    const thead = document.getElementById('thead');
+    const tbody = document.getElementById('tbody');
+    const q = document.getElementById('q');
+    const pageSizeSel = document.getElementById('page-size');
+    const pageInfo = document.getElementById('page-info');
+    const btnPrev = document.getElementById('prev');
+    const btnNext = document.getElementById('next');
+    const btnRefresh = document.getElementById('btn-refresh');
+    const btnDownload = document.getElementById('btn-download');
+    const loadingFlag = document.getElementById('loading-flag');
+
+    
+    // ----- Loading placeholders -----
+    // Switch mode: false = skeleton rows, true = per-cell spinners
+    const USE_CELL_SPINNER = true;
+
+    // Cache for last-known columns count to size placeholders
+    let lastColumns = [];
+
+    function renderSkeleton(rowsCount = 8, colsCount = (lastColumns.length || 6)) {
+      tbody.innerHTML = '';
+      const frag = document.createDocumentFragment();
+      for (let r = 0; r < rowsCount; r++) {
+        const tr = document.createElement('tr');
+        tr.className = 'table-skeleton';
+        for (let c = 0; c < colsCount; c++) {
+          const td = document.createElement('td');
+          const sk = document.createElement('span');
+          sk.className = 'skel';
+          td.appendChild(sk);
+          tr.appendChild(td);
+        }
+        frag.appendChild(tr);
+      }
+      tbody.appendChild(frag);
+    }
+
+    function renderCellSpinners(rowsCount = 6, colsCount = (lastColumns.length || 6)) {
+      tbody.innerHTML = '';
+      const frag = document.createDocumentFragment();
+      for (let r = 0; r < rowsCount; r++) {
+        const tr = document.createElement('tr');
+        for (let c = 0; c < colsCount; c++) {
+          const td = document.createElement('td');
+          const sp = document.createElement('span');
+          sp.className = 'cell-spinner';
+          td.appendChild(sp);
+          tr.appendChild(td);
+        }
+        frag.appendChild(tr);
+      }
+      tbody.appendChild(frag);
+    }
+
+let state = {
+      tab: initialTab,
+      page: 1,
+      pageSize: parseInt(pageSizeSel.value, 10),
+      query: '',
+    };
+
+    function showLoading(on) { loadingFlag.classList.toggle('hidden', !on); }
+
+    function setActiveTab(name){
+      tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+      titleBadge.textContent = name.toUpperCase();
+      state.tab = name;
+      state.page = 1;
+      loadData(true); // reload on each tab click
+    }
+
+    tabs.forEach(t => { t.addEventListener('click', () => setActiveTab(t.dataset.tab)); });
+
+    q.addEventListener('input', () => { state.page = 1; state.query = q.value.trim(); loadData(); });
+    pageSizeSel.addEventListener('change', () => { state.pageSize = parseInt(pageSizeSel.value, 10); state.page = 1; loadData(); });
+    btnPrev.addEventListener('click', () => { if (state.page > 1) { state.page--; loadData(); } });
+    btnNext.addEventListener('click', () => { state.page++; loadData(); });
+    btnRefresh.addEventListener('click', () => loadData(true));
+    btnDownload.addEventListener('click', () => {
+      const url = `/api/data.csv?table=${state.tab}&q=${encodeURIComponent(state.query)}&page=${state.page}&page_size=${state.pageSize}&wilayah=${encodeURIComponent(gWilayah)}&provider=${encodeURIComponent(gProvider)}&kategori=${encodeURIComponent(gKategori)}&t=${Date.now()}`;
+      window.location = url;
+    });
+
+    async function loadData(force=false){
+      showLoading(true);
+      if (typeof USE_CELL_SPINNER !== 'undefined' && USE_CELL_SPINNER) { renderCellSpinners(); } else { renderSkeleton(); }
+
+      const url = `/api/data?table=${state.tab}&q=${encodeURIComponent(state.query)}&page=${state.page}&page_size=${state.pageSize}&wilayah=${encodeURIComponent(gWilayah)}&provider=${encodeURIComponent(gProvider)}&kategori=${encodeURIComponent(gKategori)}&t=${force?Date.now():''}`;
+      const res = await fetch(url, { cache: 'no-store' });
+      const json = await res.json();
+
+      thead.innerHTML = '';
+      lastColumns = json.columns || [];
+      const trh = document.createElement('tr');
+      (json.columns || []).forEach(c => { const th = document.createElement('th'); th.textContent = c; trh.appendChild(th); });
+      thead.appendChild(trh);
+
+      tbody.innerHTML = '';
+      const frag = document.createDocumentFragment();
+      (json.rows || []).forEach(row => {
+        const tr = document.createElement('tr');
+        (json.columns || []).forEach(c => { const td = document.createElement('td'); td.textContent = (row[c] ?? ''); tr.appendChild(td); });
+        frag.appendChild(tr);
+      });
+      tbody.appendChild(frag);
+
+      pageInfo.textContent = `Halaman ${json.page} dari ${json.total_pages} • ${json.total_rows} baris`;
+      btnPrev.disabled = (json.page <= 1);
+      btnNext.disabled = (json.page >= json.total_pages);
+      showLoading(false);
+    }
+
+    setActiveTab(initialTab);
+  </script>
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SIMULYADI – Sistem Monitoring Kualitas Layanan Digital</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: radial-gradient(1000px 700px at 75% -10%, rgba(77,163,255,.22), transparent 60%), #010c3f;
+      color: #eaf0ff;
+      font-family: 'Inter', sans-serif;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 24px auto;
+      padding: 0 24px;
+    }
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .tab {
+      appearance: none;
+      border: 1px solid rgba(255,255,255,.08);
+      background: #0f1c62;
+      color: #eaf0ff;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .tab.active {
+      background: linear-gradient(180deg, #15318f, #0f2275);
+      border-color: rgba(77,163,255,.5);
+      box-shadow: 0 6px 18px rgba(0,0,0,.25);
+    }
+    .panel { margin-top: 16px; border: 1px solid rgba(255,255,255,.08); border-radius: 16px; overflow: hidden; }
+    .panel-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: rgba(255,255,255,.03); border-bottom: 1px solid rgba(255,255,255,.08); }
+    .panel-title { font-size: 16px; font-weight: 700; margin: 0; }
+    .viz-wrap { position: relative; width: 100%; aspect-ratio: 16/9; min-height: 720px; background: rgba(255,255,255,.04); }
+    .viz-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+    .hidden { display: none; }
+    footer { color: #a6b3e6; text-align: center; font-size: 12px; margin: 28px 0 48px; }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar (sesuai dengan home.html) -->
+  <nav class="navbar">
+    <div class="navbar-left">
+      <div style="display: flex; align-items: center; gap: 10px;">
+          <a href="/">
+            <img src="{{ url_for('static', filename='img/logo-balmon.png') }}" alt="logo-balmon" class="logo-img">
+          </a>
+          <a href="https://postel.go.id" target="_blank" rel="noopener">
+            <img src="{{ url_for('static', filename='img/logo-djid.png') }}" alt="logo-djid" class="logo-djid">
+          </a>
+          <a href="https://komdigi.go.id" target="_blank" rel="noopener">
+            <img src="{{ url_for('static', filename='img/logo-komdigi.png') }}" alt="logo-komdigi" class="logo-img">
+          </a>
+     </div>
+    </div>
+    <ul class="navbar-menu">
+      <li><a href="/">Home</a></li>
+      <li><a href="/tentang">Tentang</a></li>
+      <li><a href="/upload">Upload</a></li>
+      {% if current_user.is_authenticated %}
+      <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+      {% endif %}
+    </ul>
+  </nav>
+
+  <div class="container">
+    <div style="text-align:center;margin-bottom:20px;">
+      <h1 style="font-size:2rem;font-weight:700;margin:10px 0;color:#eaf0ff">DASHBOARD</h1>
+      <p style="font-size:14px;color:#a6b3e6">Sistem Monitoring Kualitas Layanan Digital – Balmon Tangerang</p>
+    </div>
+    
+    <div style="margin-bottom:20px; text-align:center;">
+      <label for="wilayah-filter"><strong>Filter Wilayah:</strong></label>
+      <select id="wilayah-filter" onchange="applyGlobalFilter(this.value)" style="padding:8px; border-radius:8px;">
+        <option value="">-- Semua Wilayah --</option>
+        <option value="Pandeglang">Pandeglang</option>
+        <option value="Tangerang">Tangerang</option>
+        <option value="Serang">Serang</option>
+        <option value="Cilegon">Cilegon</option>
+        <option value="Lebak">Lebak</option>
+          <!-- Tambahkan sesuai isi data real -->
+      </select>
+
+      <label for="provider-filter"><strong>Filter Provider:</strong></label>
+      <select id="provider-filter" onchange="applyGlobalFilter(document.getElementById('wilayah-filter').value)" style="padding:8px; border-radius:8px;">
+        <option value="">-- Semua Provider --</option>
+        <option value="TSEL">Telkomsel</option>
+        <option value="ISAT">Indosat</option>
+        <option value="XL">XL</option>
+        <option value="Fren/Hepi">Fren/Hepi</option>
+       
+      </select>
+
+      <label for="kategori-filter"><strong>Filter Tipe Test:</strong></label>
+      <select id="kategori-filter" onchange="applyGlobalFilter()" style="padding:8px; border-radius:8px;">
+        <option value="">-- Semua Tipe Test --</option>
+        <option value="DT">Drive Test (DT)</option>
+        <option value="ST">Static Test (ST)</option>
+      </select>
+
+      <!-- Tombol Reset -->
+    <button onclick="resetFilters()" style="margin-left: 10px; padding:8px 12px; border-radius:8px; background-color:#0e9b90; color:#fff; border:none; cursor:pointer;">
+      Reset Filter
+      
+
+    </button>
+</div>
+    </div>
+
+    
+<!-- Tombol Lihat Data -->
+<div style="text-align:center; margin: 12px 0 24px;">
+  <button id="btn-view-data" 
+          style="padding:10px 14px;border-radius:10px;background:#0e9b90;color:#fff;border:0;cursor:pointer;font-weight:700">
+    Lihat Database
+  </button>
+</div>
+
+<script>
+  // Pemetaan id panel -> nama tab pendek untuk /data
+  const DATA_TAB_MAP = {
+    "tab-wam": "wam",
+    "tab-wac": "wac",
+    "tab-ping": "ping",
+    "tab-browsing": "browsing",
+    "tab-video": "video",
+    "tab-speedtest": "speedtest",
+    "tab-rsrp": "rsrp"
+  };
+
+  function getActiveTabId() {
+    const active = document.querySelector('.tab.active');
+    return active ? active.getAttribute('data-target') : 'tab-browsing';
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const btn = document.getElementById('btn-view-data');
+    if (!btn) return;
+    btn.addEventListener('click', function() {
+      const activeId = getActiveTabId();
+      const tabName = DATA_TAB_MAP[activeId] || 'browsing';
+      const wilayahEl  = document.getElementById('wilayah-filter');
+      const providerEl = document.getElementById('provider-filter');
+      const kategoriEl = document.getElementById('kategori-filter');
+      const wilayah  = encodeURIComponent(wilayahEl ? wilayahEl.value : '');
+      const provider = encodeURIComponent(providerEl ? providerEl.value : '');
+      const kategori = encodeURIComponent(kategoriEl ? kategoriEl.value : '');
+      const url = `/data?tab=${tabName}&wilayah=${wilayah}&provider=${provider}&kategori=${kategori}`;
+      window.location.href = url;
+    });
+  });
+</script>
+
+    <!-- Tabs -->
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-target="tab-wam">WA Message</button>
+      <button class="tab" data-target="tab-wac">WA Call</button>
+      <button class="tab" data-target="tab-ping">Ping</button>
+      <button class="tab" data-target="tab-browsing">Browsing</button>
+      <button class="tab" data-target="tab-video">Video</button>
+      <button class="tab" data-target="tab-speedtest">SpeedTest</button>
+      <button class="tab" data-target="tab-rsrp">4G Parameter</button>
+    </div>
+
+    <!-- Panels -->
+    <section id="tab-wam" class="panel" role="tabpanel">
+      <div class="panel-header"><h2 class="panel-title">WA Message</h2></div>
+      <div class="panel-body"><div class="viz-wrap" data-url="https://public.tableau.com/views/dashboardsimulyadinew_wa_message/DashboardWAM?:showVizHome=no&:embed=y&:toolbar=yes"></div></div>
+    </section>
+
+    <section id="tab-wac" class="panel hidden" role="tabpanel">
+      <div class="panel-header"><h2 class="panel-title">WA Call</h2></div>
+      <div class="panel-body"><div class="viz-wrap" data-url="https://public.tableau.com/views/dashboardsimulyadinew_wa_call/DashboardWAC?:showVizHome=no&:embed=y&:toolbar=yes"></div></div>
+    </section>
+
+    <section id="tab-ping" class="panel hidden" role="tabpanel">
+      <div class="panel-header"><h2 class="panel-title">Ping</h2></div>
+      <div class="panel-body"><div class="viz-wrap" data-url="https://public.tableau.com/views/simulyadinew_dashboardping/Dashboard_PING?:showVizHome=no&:embed=y&:toolbar=yes"></div></div>
+    </section>
+
+    <section id="tab-browsing" class="panel hidden" role="tabpanel">
+      <div class="panel-header"><h2 class="panel-title">Browsing</h2></div>
+      <div class="panel-body"><div class="viz-wrap" data-url="https://public.tableau.com/views/simulyadinew_dashboardbrowsing/Dashboard_browsing?:showVizHome=no&:embed=y&:toolbar=yes"></div></div>
+    </section>
+
+    <section id="tab-video" class="panel hidden" role="tabpanel">
+      <div class="panel-header"><h2 class="panel-title">Video</h2></div>
+      <div class="panel-body"><div class="viz-wrap" data-url="https://public.tableau.com/views/simulyadinew_DashboardVideo/Dashboard_video?:showVizHome=no&:embed=y&:toolbar=yes"></div></div>
+    </section>
+
+    <section id="tab-speedtest" class="panel hidden" role="tabpanel">
+      <div class="panel-header"><h2 class="panel-title">SpeedTest</h2></div>
+      <div class="panel-body"><div class="viz-wrap" data-url="https://public.tableau.com/views/simulyadinew_dashboardspeedtest/Dashboard_SpeedTest?:showVizHome=no&:embed=y&:toolbar=yes"></div></div>
+    </section>
+
+    <section id="tab-rsrp" class="panel hidden" role="tabpanel">
+      <div class="panel-header"><h2 class="panel-title">4G RSRP</h2></div>
+      <div class="panel-body"><div class="viz-wrap" data-url="https://public.tableau.com/views/simulyadinew_dashboard4GRSRP/DashboardRSRP?:showVizHome=no&:embed=y&:toolbar=yes"></div></div>
+    </section>
+
+    <footer>
+      © 2025 – Balai Monitoring SFR Kelas I Tangerang | Aplikasi SIMULYADI v1.0 | RYNLDSR ©
+    </footer>
+  </div>
+
+  <script>
+    function loadIframe(vwrap){
+      if(vwrap.dataset.inited) return;
+      var url = vwrap.getAttribute('data-url');
+      var iframe = document.createElement('iframe');
+      iframe.setAttribute('title','Tableau Dashboard');
+      iframe.setAttribute('loading','eager');
+      iframe.referrerPolicy = 'no-referrer-when-downgrade';
+      iframe.src = url;
+      vwrap.appendChild(iframe);
+      vwrap.dataset.inited = '1';
+    }
+
+    var tabs = Array.from(document.querySelectorAll('.tab'));
+    var panels = Array.from(document.querySelectorAll('.panel'));
+
+    function showTab(id){
+      panels.forEach(function(p){ p.classList.toggle('hidden', p.id !== id); });
+      tabs.forEach(function(t){ t.classList.toggle('active', t.dataset.target === id); });
+      var vwrap = document.querySelector('#'+id+' .viz-wrap');
+      if(vwrap) loadIframe(vwrap);
+    }
+
+    tabs.forEach(function(btn){
+      btn.addEventListener('click', function(){ showTab(btn.dataset.target); });
+    });
+
+    document.addEventListener('DOMContentLoaded', function(){
+      var first = document.querySelector('.tab.active');
+      if(first) showTab(first.dataset.target);
+    });
+
+    //untuk global filter
+    function applyGlobalFilter() {
+    const wilayah = document.getElementById('wilayah-filter').value;
+    const provider = document.getElementById('provider-filter').value;
+    const kategori = document.getElementById('kategori-filter').value;
+
+    document.querySelectorAll('.viz-wrap').forEach(function(vwrap){
+      const baseUrl = vwrap.getAttribute('data-url').split('?:')[0];
+      const params = '?:showVizHome=no&:embed=y&:toolbar=yes';
+      let newUrl = baseUrl + params;
+
+      if (wilayah) {
+        newUrl += '&Wilayah=' + encodeURIComponent(wilayah);
+      }
+      if (provider) {
+        newUrl += '&Provider=' + encodeURIComponent(provider);
+      }
+      if (kategori) {
+        newUrl += '&Test_Type=' + encodeURIComponent(kategori);
+      }
+
+
+      // Reset dan ganti iframe
+      vwrap.innerHTML = '';
+      delete vwrap.dataset.inited;
+      vwrap.setAttribute('data-url', newUrl);
+
+      // Hanya load ulang untuk tab yang sedang aktif
+      if (!vwrap.closest('.hidden')) {
+        loadIframe(vwrap);
+      }
+    });
+  } 
+
+    function resetFilters() {
+  // Reset dropdown ke default kosong
+    document.getElementById('wilayah-filter').value = '';
+    document.getElementById('provider-filter').value = '';
+    document.getElementById('kategori-filter').value = '';
+
+  // Terapkan ulang tanpa filter
+  applyGlobalFilter();
+      }
+
+
+  </script>
+</body>
+</html>

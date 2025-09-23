@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>SIMULYADI – SISTEM MONITORING KUALITAS LAYANAN DIGITAL</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: radial-gradient(1000px 700px at 75% -10%, rgba(77,163,255,.22), transparent 60%), #010c3f;
+      color: #eaf0ff;
+      font-family: 'Inter', sans-serif;
+    }
+    .upload-box {
+      background-color: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      padding: 30px;
+      max-width: 600px;
+      margin: 30px auto;
+    }
+    label { display: block; margin-top: 12px; }
+    input[type="file"], select {
+      margin: 8px 0 18px;
+      padding: 10px;
+      border-radius: 6px;
+      width: 100%;
+      max-width: 500px;
+    }
+    input[type="submit"] {
+      background-color: #0f1c62;
+      color: #eaf0ff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    input[type="submit"]:hover {
+      background-color: #15318f;
+    }
+    .flash-wrap{margin:12px 0}
+    .flash{
+      background:#023e8a;color:#fff;
+      padding:10px 12px;border-radius:6px;
+      border:1px solid #001d3d;
+      margin-bottom:8px;font-size:14px
+    }
+    .flash.error{background:#a4161a;border-color:#660708}
+    .flash.success{background:#2a9d8f;border-color:#1b7f75}
+    footer {
+      color: #a6b3e6;
+      text-align: center;
+      font-size: 12px;
+      margin: 40px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar">
+    <div class="navbar-left">
+      <div style="display: flex; align-items: center; gap: 10px;">
+          <a href="/">
+            <img src="{{ url_for('static', filename='img/logo-balmon.png') }}" alt="logo-balmon" class="logo-img">
+          </a>
+          <a href="https://postel.go.id" target="_blank" rel="noopener">
+            <img src="{{ url_for('static', filename='img/logo-djid.png') }}" alt="logo-djid" class="logo-djid">
+          </a>
+          <a href="https://komdigi.go.id" target="_blank" rel="noopener">
+            <img src="{{ url_for('static', filename='img/logo-komdigi.png') }}" alt="logo-komdigi" class="logo-img">
+          </a>
+     </div>
+    </div>
+    <ul class="navbar-menu">
+      <li><a href="/">Home</a></li>
+      <li><a href="/tentang">Tentang</a></li>
+      <li><a href="/dashboard">Dashboard</a></li>
+      {% if current_user.is_authenticated %}
+      <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+      {% endif %}
+    </ul>
+  </nav>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="container">
+    <div class="upload-box">
+      <h2 style="text-align:center;">Upload Data Kualitas Layanan</h2>
+
+      <!-- Flash Messages -->
+      {% with msgs = get_flashed_messages(with_categories=true) %}
+        {% if msgs %}
+          <div class="flash-wrap">
+            {% for cat, m in msgs %}
+              <div class="flash {{ 'error' if cat=='error' else 'success' if cat=='success' else '' }}">{{ m }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <!-- Tombol Download Template -->
+      <p style="margin-bottom:20px;">
+        <a id="download-template-btn" href="/static/template/upload_template_dt.xlsx" class="btn btn-outline" download>
+          Download Template Upload
+        </a>
+      </p>
+
+      <!-- Tombol Filter Kategori -->
+      <label for="kategori"><strong>Kategori Data</strong></label>
+      <select name="kategori_data" id="kategori_data" required>
+        <option value="">-- Pilih Kategori --</option>
+        <option value="DT">Drive Test (DT)</option>
+        <option value="ST">Static Test (ST)</option>
+      </select>
+
+      <!-- Form Upload -->
+      <form action="/upload" method="post" enctype="multipart/form-data">
+
+        <label for="file"><strong>Pilih File Excel atau CSV</strong></label>
+        <input type="file" name="file" id="file" accept=".csv,.xls,.xlsx" required>
+
+        <input type="submit" value="Upload dan Proses">
+      </form>
+    </div>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    © 2025 – Balai Monitoring SFR Kelas I Tangerang | Aplikasi SIMULYADI v1.0 | RYNLDSR ©
+  </footer>
+
+  <!-- ===== SCRIPT DINAMIS UNTUK TEMPLATE ===== -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function() 
+    {
+      const kategoriSelect = document.getElementById("kategori_data");
+      const downloadBtn = document.getElementById("download-template-btn");
+
+      kategoriSelect.addEventListener("change", function () 
+      {
+        const selected = this.value;
+
+        if (selected === "ST") {
+          downloadBtn.href = "/static/template/upload_template_st.xlsx";
+        } else if (selected === "DT") {
+          downloadBtn.href = "/static/template/upload_template_dt.xlsx";
+        } else {
+          downloadBtn.href = "#";
+        }
+      });
+
+      // Tambahan untuk menampilkan overlay saat upload
+        const form = document.querySelector('form');
+        const overlay = document.getElementById('loadingOverlay');
+
+      if (form) {
+        form.addEventListener('submit', function () {
+          overlay.style.display = 'flex';
+        });
+      }
+    });
+  </script>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div>Uploading data... Harap tunggu.</div>
+</div>
+
+</body>
+</html>
