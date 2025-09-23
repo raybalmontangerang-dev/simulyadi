@@ -1,0 +1,12 @@
+.git
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+*.sqlite3
+*.db
+*.log
+dashboard-monitoring-*.json
+credentials*.json
+service_account*.json

@@ -1,0 +1,63 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+.virtualenv/
+**/.venv/**
+**/venv/**
+**/env/**
+
+# Build & packaging
+build/
+develop-eggs/
+dist/
+downloads/
+.eggs/
+*.egg-info/
+*.egg
+wheels/
+share/python-wheels/
+
+# Testing & coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Logs & local DB
+*.log
+*.sqlite3
+*.db
+
+# Env & secrets (VERY IMPORTANT)
+.env
+.env.*
+credentials*.json
+service_account*.json
+dashboard-monitoring-*.json
+
+# Node (if any)
+node_modules/
+
+# Compiled assets (if any build step)
+static/build/
