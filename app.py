@@ -55,10 +55,13 @@ SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive",
 ]
+
 GOOGLE_CREDENTIALS_JSON = os.getenv("GOOGLE_CREDENTIALS_JSON")
+
 if GOOGLE_CREDENTIALS_JSON:
     # Render: kredensial disimpan sebagai ENV (JSON utuh)
     creds = Credentials.from_service_account_info(json.loads(GOOGLE_CREDENTIALS_JSON), scopes=SCOPES)
+    CRED_SOURCE = "env"
 else:
     # Lokal: pakai file di disk (nama default/atau GOOGLE_CREDENTIALS_FILE/GOOGLE_APPLICATION_CREDENTIALS)
     CREDENTIALS_FILE = os.getenv("GOOGLE_CREDENTIALS_FILE", CREDENTIALS_FILE)
@@ -68,8 +71,12 @@ else:
             CREDENTIALS_FILE = cred_env_path
         else:
             raise FileNotFoundError(f"Credentials JSON tidak ditemukan: {CREDENTIALS_FILE}")
-        creds = Credentials.from_service_account_file(CREDENTIALS_FILE, scopes=SCOPES)
+    # <- PENTING: selalu set creds di luar if-not-file
+    creds = Credentials.from_service_account_file(CREDENTIALS_FILE, scopes=SCOPES)
+    CRED_SOURCE = "file"
+
 gc = gspread.authorize(creds)
+
 
 app = Flask(__name__)
 # Ambil secret dari ENV di server, fallback dev untuk lokal
@@ -422,5 +429,6 @@ def api_data_csv():
 if __name__ == "__main__":
 
     app.run(debug=True)
+
 
 
