@@ -17,12 +17,6 @@ DASH_SPREADSHEET_ID = "12x5yfeGiBKH29ZuAXLV8aFXN02Xgqoh9sfQ42myPuLk"
 LOG_SPREADSHEET_ID  = "16N5IOx-dRt0KvwTkptWmiMPgAdlbmWibKkDjm10XG_s"
 CREDENTIALS_FILE    = "dashboard-monitoring-468708-022bf9f1140e.json"
 
-if not os.path.isfile(CREDENTIALS_FILE):
-    cred_env = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-    if cred_env and os.path.isfile(cred_env):
-        CREDENTIALS_FILE = cred_env
-    else:
-        raise FileNotFoundError(f"Credentials JSON tidak ditemukan: {CREDENTIALS_FILE}")
 
 SUPPORTED_TYPES = ["whatsapp_call", "whatsapp_messaging", "ping", "browsing", "video", "speed_testing", "4g_param"]
 ALL_OPTION = "ALL_SHEETS"
@@ -61,7 +55,20 @@ SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive",
 ]
-creds = Credentials.from_service_account_file(CREDENTIALS_FILE, scopes=SCOPES)
+GOOGLE_CREDENTIALS_JSON = os.getenv("GOOGLE_CREDENTIALS_JSON")
+if GOOGLE_CREDENTIALS_JSON:
+    # Render: kredensial disimpan sebagai ENV (JSON utuh)
+    creds = Credentials.from_service_account_info(json.loads(GOOGLE_CREDENTIALS_JSON), scopes=SCOPES)
+else:
+    # Lokal: pakai file di disk (nama default/atau GOOGLE_CREDENTIALS_FILE/GOOGLE_APPLICATION_CREDENTIALS)
+    CREDENTIALS_FILE = os.getenv("GOOGLE_CREDENTIALS_FILE", CREDENTIALS_FILE)
+    if not os.path.isfile(CREDENTIALS_FILE):
+        cred_env_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+        if cred_env_path and os.path.isfile(cred_env_path):
+            CREDENTIALS_FILE = cred_env_path
+        else:
+            raise FileNotFoundError(f"Credentials JSON tidak ditemukan: {CREDENTIALS_FILE}")
+        creds = Credentials.from_service_account_file(CREDENTIALS_FILE, scopes=SCOPES)
 gc = gspread.authorize(creds)
 
 app = Flask(__name__)
@@ -414,3 +421,4 @@ def api_data_csv():
 if __name__ == "__main__":
 
     app.run(debug=True)
+
