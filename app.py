@@ -96,7 +96,7 @@ class User(UserMixin):
     def get_id(self):
         return self.id
 
-users = {"admin": User(id="admin", name="balmontangerang", password="password123")}
+users = {"admin": User(id="balmontangerang", name="balmontangerang", password="password123")}
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -434,6 +434,7 @@ def api_data_csv():
 if __name__ == "__main__":
 
     app.run(debug=True)
+
 
 
 
