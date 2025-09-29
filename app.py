@@ -72,7 +72,8 @@ else:
 gc = gspread.authorize(creds)
 
 app = Flask(__name__)
-app.secret_key = "s1muly4d1-2025-s3cr3t-k3y"
+# Ambil secret dari ENV di server, fallback dev untuk lokal
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "s1muly4d1-2025-s3cr3t-k3y")
 
 # ===== LoginManager setup =====
 login_manager = LoginManager()
@@ -421,4 +422,5 @@ def api_data_csv():
 if __name__ == "__main__":
 
     app.run(debug=True)
+
 
