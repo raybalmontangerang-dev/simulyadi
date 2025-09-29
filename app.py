@@ -236,9 +236,14 @@ def health():
     try:
         gc.open_by_key(RAW_SPREADSHEET_ID).worksheets()
         gc.open_by_key(DASH_SPREADSHEET_ID).worksheets()
-        return {"ok": True, "message": "Service account & spreadsheet akses OK"}, 200
+        return {
+            "ok": True,
+            "message": "Service account & spreadsheet akses OK",
+            "cred_source": CRED_SOURCE  # "env" atau "file"
+        }, 200
     except Exception as e:
         return {"ok": False, "error": str(e)}, 500
+
 
 # =======================
 # DATA VIEWER (Google Sheets)
@@ -429,6 +434,7 @@ def api_data_csv():
 if __name__ == "__main__":
 
     app.run(debug=True)
+
 
 
 
